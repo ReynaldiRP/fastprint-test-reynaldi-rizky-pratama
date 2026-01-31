@@ -1,9 +1,17 @@
 {% extends 'products/base.html' %} {% load humanize %} {% block content %}
-<div class="mb-8">
-  <h2 class="text-2xl font-semibold mb-1">Products</h2>
-  <p class="text-sm text-gray-500">
-    Showing {{ products|length }} of {{ total_count }} products
-  </p>
+<div class="mb-8 flex justify-between items-center">
+  <div>
+    <h2 class="text-2xl font-semibold mb-1">Products</h2>
+    <p class="text-sm text-gray-500">
+      Showing {{ products|length }} of {{ total_count }} products
+    </p>
+  </div>
+  <a
+    href="/add/"
+    class="bg-gray-900 text-white px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+  >
+    Add Product
+  </a>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
