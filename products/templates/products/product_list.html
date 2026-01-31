@@ -40,6 +40,12 @@
         {{ product.status }}
       </span>
     </div>
+    <a
+      href="/edit/{{ product.id_produk }}/"
+      class="block mt-3 text-center text-sm border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      Edit
+    </a>
   </div>
   {% empty %}
   <div class="col-span-full text-center py-12 text-gray-500">

@@ -28,6 +28,32 @@ def product_form(request):
     
     return render(request, 'products/product_form.html', context)
 
+def product_edit(request, product_id):
+    """Display form to edit existing product"""
+    # Get all products from API
+    api_data = fetch_api_data_all()
+    
+    # Find the specific product by id
+    product = None
+    for item in api_data:
+        if str(item.get('id_produk')) == str(product_id):
+            product = item
+            break
+    
+    if not product:
+        return redirect('product_list')
+    
+    # Get unique categories
+    categories = sorted(set(item['kategori'] for item in api_data if item.get('kategori')))
+    
+    context = {
+        'product': product,
+        'categories': categories,
+        'status_choices': ['bisa dijual', 'tidak bisa dijual']
+    }
+    
+    return render(request, 'products/product_edit.html', context)
+
 def fetch_api_data():
     """
     Fetch product data from Fastprint API (only 'bisa dijual' status)
