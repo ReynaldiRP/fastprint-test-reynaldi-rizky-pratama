@@ -27,7 +27,7 @@
         >Rp {{ product.harga|floatformat:0|intcomma }}</span
       >
       <span
-        class="text-xs px-2 py-1 rounded {% if product.status == 'bisa dijual' %}bg-green-50 text-green-700{% else %}bg-gray-50 text-gray-500{% endif %}"
+        class="text-xs px-2 py-1 rounded {% if product.status == 'bisa dijual' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}"
       >
         {{ product.status }}
       </span>

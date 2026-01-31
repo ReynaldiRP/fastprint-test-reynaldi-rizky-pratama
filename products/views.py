@@ -9,7 +9,7 @@ def product_list(request):
     products = fetch_api_data()
 
     context = {
-        'products': products[:5],
+        'products': products,
         'total_count': len(products)
     }
 
@@ -38,11 +38,11 @@ def fetch_api_data():
             data={'username': username, 'password': md5_password}
         )
 
-        print(f"API Response Status: {response.status_code}")
-
         if response.status_code == 200:
             data = response.json()
-            return data.get('data', [])  # Return products list
+            available_products = [item for item in data.get('data', []) if item.get('status') == 'bisa dijual']
+
+            return available_products  # Return products list
         else:
             print(f"API Error: {response.text}")
             return []
