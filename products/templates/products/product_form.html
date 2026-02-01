@@ -84,8 +84,8 @@
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
     
       try {
-        // Send POST request with JSON
-        const response = await fetch(window.location.href, {
+        // Send POST request to dedicated API endpoint
+        const response = await fetch("{% url 'api_create_product' %}", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

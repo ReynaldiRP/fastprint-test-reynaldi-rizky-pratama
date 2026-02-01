@@ -140,8 +140,8 @@
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     try {
-      // Send PUT request
-      const response = await fetch(window.location.href, {
+      // Send PUT request to dedicated API endpoint
+      const response = await fetch("{% url 'api_update_product' product.id_produk %}", {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

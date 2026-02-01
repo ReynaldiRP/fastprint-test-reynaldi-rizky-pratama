@@ -1,56 +1,82 @@
 {% extends 'products/base.html' %} {% load humanize %} {% block content %}
-<div class="mb-8 flex justify-between items-center">
-  <div>
-    <h2 class="text-2xl font-semibold mb-1">Products</h2>
-    <p class="text-sm text-gray-500">
-      Showing {{ products|length }} of {{ total_count }} products
-    </p>
-  </div>
-  <a
-    href="/add/"
-    class="bg-gray-900 text-white px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-colors text-sm"
-  >
-    Add Product
-  </a>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {% for product in products %}
-  <div
-    class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
-  >
-    <div class="mb-3">
-      <span class="text-xs text-gray-400 uppercase"
-        >{{ product.kategori }}</span
-      >
-      <h3 class="text-base font-medium mt-1 line-clamp-2">
-        {{ product.nama_produk }}
-      </h3>
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h2 class="text-2xl font-semibold mb-1">Products</h2>
+      <p class="text-sm text-gray-500">Showing {{ products|length }} of {{ total_count }} products</p>
     </div>
+    <a href="/add/" class="bg-gray-900 text-white px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-colors text-sm">Add Product</a>
+  </div>
 
-    <div
-      class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100"
-    >
-      <span class="text-lg font-semibold"
-        >Rp {{ product.harga|floatformat:0|intcomma }}</span
-      >
-      <span
-        class="text-xs px-2 py-1 rounded {% if product.status == 'bisa dijual' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}"
-      >
-        {{ product.status }}
-      </span>
-    </div>
-    <a
-      href="/edit/{{ product.id_produk }}/"
-      class="block mt-3 text-center text-sm border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-    >
-      Edit
-    </a>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for product in products %}
+      <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+        <div class="mb-3">
+          <span class="text-xs text-gray-400 uppercase">{{ product.kategori }}</span>
+          <h3 class="text-base font-medium mt-1 line-clamp-2">{{ product.nama_produk }}</h3>
+        </div>
+
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+          <span class="text-lg font-semibold">Rp {{ product.harga|floatformat:0|intcomma }}</span>
+          <span class="text-xs px-2 py-1 rounded {% if product.status == 'bisa dijual' %}
+              bg-green-50 text-green-700
+            {% else %}
+              bg-red-50 text-red-700
+            {% endif %}">
+            {{ product.status }}
+          </span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2 mt-3">
+          <a href="/edit/{{ product.id_produk }}/" class="flex-1 text-center text-sm border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">Edit</a>
+          <button onclick="deleteProduct('{{ product.id_produk }}', '{{ product.nama_produk }}')" class="flex-1 text-center text-sm border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors">Delete</button>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-span-full text-center py-12 text-gray-500">
+        <p>No products available</p>
+      </div>
+    {% endfor %}
   </div>
-  {% empty %}
-  <div class="col-span-full text-center py-12 text-gray-500">
-    <p>No products available</p>
-  </div>
-  {% endfor %}
-</div>
-{% endblock content %}
+
+  <script>
+    // Delete product with confirmation
+    async function deleteProduct(productId, productName) {
+      // Show confirmation dialog
+      const confirmed = confirm(`Are you sure you want to delete "${productName}"?\n\nThis action cannot be undone.`)
+    
+      if (!confirmed) {
+        return
+      }
+    
+      try {
+        // Get CSRF token from cookie
+        const csrftoken =
+          document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('csrftoken='))
+            ?.split('=')[1] || ''
+    
+        // Send DELETE request to API endpoint
+        const response = await fetch(`/api/products/${productId}/delete/`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': csrftoken
+          }
+        })
+    
+        const result = await response.json()
+    
+        if (result.success) {
+          alert(result.message)
+          // Reload page to show updated list
+          window.location.reload()
+        } else {
+          alert('Error: ' + result.message)
+        }
+      } catch (error) {
+        alert('Error deleting product: ' + error.message)
+      }
+    }
+  </script>
+{% endblock %}
