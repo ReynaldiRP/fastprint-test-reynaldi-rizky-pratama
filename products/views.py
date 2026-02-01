@@ -1,5 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 from .models import Product, Category
+from .serializers import ProductSerializer
 
 # Create your views here.
 def product_list(request): 
@@ -26,7 +31,52 @@ def product_list(request):
 
 def product_form(request):
     """Display form to add new product"""
-    # Get unique categories from database
+    if request.method == 'POST':
+        # Check if request is JSON (from fetch API)
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+                
+                # Validate and create using serializer
+                serializer = ProductSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Product added successfully!'
+                    })
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'errors': serializer.errors
+                    }, status=400)
+            except json.JSONDecodeError:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid JSON data'
+                }, status=400)
+        else:
+            # Handle standard form POST (fallback)
+            data = {
+                'nama_produk': request.POST.get('nama_produk'),
+                'harga': request.POST.get('harga'),
+                'kategori': request.POST.get('kategori'),
+                'status': request.POST.get('status')
+            }
+            
+            # Validate and create using serializer
+            serializer = ProductSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                messages.success(request, 'Product added successfully!')
+                return redirect('product_list')
+            else:
+                # Show validation errors
+                for field, errors in serializer.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+    
+    # GET request - show form
     categories = Category.objects.values_list('nama_kategori', flat=True).order_by('nama_kategori')
     
     context = {
@@ -44,7 +94,54 @@ def product_edit(request, product_id):
         id_produk=product_id
     )
     
-    # Convert to dict format for template
+    # Handle PUT/PATCH request (RESTful update)
+    if request.method in ['PUT', 'PATCH']:
+        try:
+            # Parse JSON data from request body
+            data = json.loads(request.body)
+            
+            # Validate and update using serializer
+            serializer = ProductSerializer(product_obj, data=data, partial=(request.method == 'PATCH'))
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Product updated successfully!'
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'errors': serializer.errors
+                }, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid JSON data'
+            }, status=400)
+    
+    # Handle legacy POST request (fallback for non-JavaScript clients)
+    elif request.method == 'POST':
+        # Get data from POST request
+        data = {
+            'nama_produk': request.POST.get('nama_produk'),
+            'harga': request.POST.get('harga'),
+            'kategori': request.POST.get('kategori'),
+            'status': request.POST.get('status')
+        }
+        
+        # Validate and update using serializer
+        serializer = ProductSerializer(product_obj, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            messages.success(request, 'Product updated successfully!')
+            return redirect('product_list')
+        else:
+            # Show validation errors
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+    
+    # GET request - show form with existing data
     product = {
         'id_produk': product_obj.id_produk,
         'nama_produk': product_obj.nama_produk,
