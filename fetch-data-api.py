@@ -39,7 +39,8 @@ def test_api():
     month = wib_date.month
     year = str(wib_date.year)[2:]
     
-    username = f"tesprogrammer{day:02d}{month:02d}{year}C10"
+    raw_username = response.headers.get("X-Credentials-Username")
+    username = raw_username.split("(")[0].strip()
     password_plain = f"bisacoding-{day:02d}-{month:02d}-{year}"
     password_md5 = hashlib.md5(password_plain.encode()).hexdigest()
     
