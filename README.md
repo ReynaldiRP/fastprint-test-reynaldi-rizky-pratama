@@ -90,27 +90,11 @@ python manage.py migrate
 
 ### 4. Populate Database from API
 
-**Option A: Run Python Script**
+**Run Python Script**
 ```bash
-python testing-api.py
+python fetch-data-api.py
 ```
-This will fetch data from the API and display it. Then execute the generated SQL inserts.
-
-**Option B: Use SQL Script**
-```bash
-psql -U postgres -d test-fastprint -f insert_data.sql
-```
-
-### 5. Verify Data
-```bash
-python manage.py shell
-```
-```python
-from products.models import Product, Category, Status
-print(f"Products: {Product.objects.count()}")
-print(f"Categories: {Category.objects.count()}")
-print(f"Statuses: {Status.objects.count()}")
-```
+This will fetch data from the API and run the script to populate the database.
 
 ## ▶️ Running the Application
 
